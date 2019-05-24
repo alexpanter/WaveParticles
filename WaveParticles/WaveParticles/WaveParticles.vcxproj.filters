@@ -19,6 +19,15 @@
     <Filter Include="shaders\image">
       <UniqueIdentifier>{e5b6cbe7-dc1d-4749-bbe3-db9a8d8b2b32}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders\transformFeedback">
+      <UniqueIdentifier>{1a273d03-4378-4e14-b3b9-2897e264a749}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\transformFeedback2">
+      <UniqueIdentifier>{7e4c777b-8ceb-4ae2-9aa8-e7c37d5a3552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\transformFeedback3">
+      <UniqueIdentifier>{0845974f-823a-453b-a9a3-89d32d8e3d83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WaveParticles.cpp">
@@ -62,13 +71,28 @@
     <ClInclude Include="Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestTransformFeedback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shaders\triangle\vertex.shd">
-      <Filter>shaders\image</Filter>
-    </None>
     <None Include="..\shaders\image\fragment.shd">
       <Filter>shaders\image</Filter>
+    </None>
+    <None Include="..\shaders\image\vertex.shd">
+      <Filter>shaders\image</Filter>
+    </None>
+    <None Include="..\shaders\transformFeedback\vertex.shd">
+      <Filter>shaders\transformFeedback</Filter>
+    </None>
+    <None Include="..\shaders\transformFeedback2\geometry.shd">
+      <Filter>shaders\transformFeedback2</Filter>
+    </None>
+    <None Include="..\shaders\transformFeedback2\vertex.shd">
+      <Filter>shaders\transformFeedback2</Filter>
+    </None>
+    <None Include="..\shaders\transformFeedback3\vertex.shd">
+      <Filter>shaders\transformFeedback3</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -12,7 +12,7 @@ namespace Core::Shaders
 	// for transform feedback
 	typedef enum
 	{
-		SHADER_TYPE_V,
-		SHADER_TYPE_VG,
+		TF_SHADER_TYPE_V,
+		TF_SHADER_TYPE_VG,
 	} TransformFeedbackShaderType;
 }

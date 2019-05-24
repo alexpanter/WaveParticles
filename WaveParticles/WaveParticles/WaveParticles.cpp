@@ -1,4 +1,4 @@
-// disable stupid compile errors with sscanf unsafe
+﻿// disable stupid compile errors with sscanf unsafe
 // (yes I know it is unsafe, but I take care when I use it!)
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -15,6 +15,7 @@
 #include "FileIO.h"
 #include "ShaderWrapper.h"
 #include "Image.h"
+#include "TestTransformFeedback.h"
 
 using namespace Core;
 
@@ -109,14 +110,18 @@ int main()
 	std::string contents = FileIO::getPlatformFilePath("..|shaders|image|vertex.shd");
 	std::cout << "read shader: " << FileIO::readFileContents(contents) << std::endl;*/
 
-	// SHADERS
+	// TEST IMAGE
 	Shaders::ShaderWrapper imageShader("..|shaders|image", Shaders::SHADER_TYPE_VF);
 
-	// IMAGE TEST
 	glm::vec2 imageLowerLeft(-0.5, -0.5f);
 	GLfloat imageWidth = 1.0f;
 	GLfloat imageHeight = 1.0f;
 	Graphics::Image image(imageLowerLeft, imageWidth, imageHeight);
+
+
+	// DATA FOR TRANSFORM FEEDBACK
+	TestTransformFeedback3();
+
 
 	// GAME LOOP
 	while (win->IsRunning())
@@ -132,6 +137,7 @@ int main()
 
 		if (camUpdate) {
 			cam->CalculateViewProjection();
+			std::cout << "Move camera!" << std::endl;
 		}
 		
 		if (timer.ShouldRender()) {

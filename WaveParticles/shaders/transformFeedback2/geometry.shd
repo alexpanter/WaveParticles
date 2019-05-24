@@ -1,0 +1,17 @@
+#version 330 core
+
+layout (points) in;
+layout (points, max_vertices = 3) out;
+
+in float[] NewPosition;
+out float NewGeometryPosition;
+
+void main()
+{
+	for(int i = 0; i < 3; i++)
+	{
+		NewGeometryPosition = NewPosition[0] + float(i);
+		EmitVertex();
+	}
+	EndPrimitive();
+}

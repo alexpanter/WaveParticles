@@ -25,11 +25,10 @@ namespace Core::Shaders
 		}
 
 		ShaderWrapper(const char* path, TransformFeedbackShaderType type,
-			const std::vector<std::string>& outputs)
+			const char** outputs, int numOutputs)
 			: _shaderName(path)
 		{
-			_shader = LoadTransformFeedbackShaderProgram(path, type,
-				outputs);
+			_shader = LoadTransformFeedbackShaderProgram(path, type, outputs, numOutputs);
 		}
 
 		~ShaderWrapper()
@@ -49,6 +48,11 @@ namespace Core::Shaders
 			GLint64 nowTime;
 			glGetInteger64v(GL_TIMESTAMP, &nowTime);
 			_deltaTime = nowTime - _lastTime;
+		}
+
+		GLuint GetShader() const
+		{
+			return _shader;
 		}
 
 		void PrintLastMeasuredTime()

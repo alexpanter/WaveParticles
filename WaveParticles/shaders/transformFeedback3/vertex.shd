@@ -1,0 +1,9 @@
+#version 330 core
+
+in vec2 Position;
+out vec2 NewPosition;
+
+void main()
+{
+	NewPosition = vec2(Position.x + 1.0f, Position.y);
+}

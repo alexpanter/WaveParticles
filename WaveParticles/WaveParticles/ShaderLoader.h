@@ -112,19 +112,25 @@ namespace Core::Shaders
 
 
 	GLuint LoadTransformFeedbackShaderProgram(const char* path,
-		TransformFeedbackShaderType type,
-		const std::vector<std::string>& outputs)
+		TransformFeedbackShaderType type, const char** outputs, int numOutputs)
 	{
 		std::vector<GLuint> shaders;
 		const std::string shaderDir = Core::FileIO::getPlatformPath(path);
 
+		std::cout << "Testing TF shader outputs:" << std::endl;
+		for (int i = 0; i < numOutputs; i++)
+		{
+			std::cout << outputs[i] << std::endl;
+		}
+		std::cout << std::endl;
+
 		switch (type)
 		{
-		case SHADER_TYPE_V:
+		case TF_SHADER_TYPE_V:
 			printf("Loading V shader program '%s'\n", shaderDir.c_str());
 			shaders.push_back(LoadVertexShader(shaderDir));
 			break;
-		case SHADER_TYPE_VG:
+		case TF_SHADER_TYPE_VG:
 			printf("Loading VG shader program '%s'\n", shaderDir.c_str());
 			shaders.push_back(LoadVertexShader(shaderDir));
 			shaders.push_back(LoadGeometryShader(shaderDir));
@@ -134,7 +140,45 @@ namespace Core::Shaders
 			exit(-1);
 		}
 
-		return 0;
+		GLuint program = glCreateProgram();
+
+		// attach all loaded shaders
+		for (std::vector<GLuint>::iterator it = shaders.begin();
+			it != shaders.end(); it++)
+		{
+			glAttachShader(program, *it);
+		}
+
+		// tell OpenGL which output attributes to capture in the
+		// transform feedback buffer (TFB)
+		glTransformFeedbackVaryings(program, numOutputs, outputs, GL_INTERLEAVED_ATTRIBS);
+
+		// check if linking was successful
+		glLinkProgram(program);
+		GLint result = GL_FALSE;
+		glGetProgramiv(program, GL_LINK_STATUS, &result);
+
+		// if linking did not succeed, print the error message
+		if (!result)
+		{
+			fprintf(stderr, "---> ERROR: linking shader program:\n");
+			int logLength;
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+			std::vector<GLchar> programError((logLength > 1) ? logLength : 1);
+			glGetProgramInfoLog(program, logLength, NULL, &programError[0]);
+			std::cout << &programError[0] << std::endl;
+		}
+
+		// perform cleanup
+		for (std::vector<GLuint>::iterator it = shaders.begin();
+			it != shaders.end(); it++)
+		{
+			glDeleteShader(*it);
+		}
+
+		
+
+		return program;
 	}
 
 	GLuint LoadShaderProgram(const char* path, ShaderType type)

@@ -1,0 +1,9 @@
+#version 330 core
+
+in float Position;
+out float NewPosition;
+
+void main()
+{
+	NewPosition = Position * Position;
+}

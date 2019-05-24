@@ -170,10 +170,15 @@
     <ClInclude Include="ShaderLoader.h" />
     <ClInclude Include="ShaderType.h" />
     <ClInclude Include="ShaderWrapper.h" />
+    <ClInclude Include="TestTransformFeedback.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\image\fragment.shd" />
-    <None Include="..\shaders\triangle\vertex.shd" />
+    <None Include="..\shaders\image\vertex.shd" />
+    <None Include="..\shaders\transformFeedback2\geometry.shd" />
+    <None Include="..\shaders\transformFeedback2\vertex.shd" />
+    <None Include="..\shaders\transformFeedback3\vertex.shd" />
+    <None Include="..\shaders\transformFeedback\vertex.shd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
