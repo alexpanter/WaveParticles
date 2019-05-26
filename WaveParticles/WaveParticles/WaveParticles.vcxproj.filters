@@ -28,6 +28,12 @@
     <Filter Include="shaders\transformFeedback3">
       <UniqueIdentifier>{0845974f-823a-453b-a9a3-89d32d8e3d83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders\point">
+      <UniqueIdentifier>{65168d67-1dc8-4ddd-89c7-bc6cf212d9c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\movePoint">
+      <UniqueIdentifier>{7abac778-ba95-49b3-938d-c47022150651}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WaveParticles.cpp">
@@ -93,6 +99,18 @@
     </None>
     <None Include="..\shaders\transformFeedback3\vertex.shd">
       <Filter>shaders\transformFeedback3</Filter>
+    </None>
+    <None Include="..\shaders\point\fragment.shd">
+      <Filter>shaders\point</Filter>
+    </None>
+    <None Include="..\shaders\point\vertex.shd">
+      <Filter>shaders\point</Filter>
+    </None>
+    <None Include="..\shaders\point\geometry.shd">
+      <Filter>shaders\point</Filter>
+    </None>
+    <None Include="..\shaders\movePoint\vertex.shd">
+      <Filter>shaders\movePoint</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -36,7 +36,7 @@ void TestTransformFeedback1()
 	GLuint tbo;
 	glGenBuffers(1, &tbo);
 	glBindBuffer(GL_ARRAY_BUFFER, tbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(data), nullptr, GL_STATIC_READ);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(data), nullptr, GL_STATIC_DRAW);
 
 	//void glTransformFeedbackVaryings(GLuint program​, GLsizei count​, const char** varyings​, GLenum bufferMode​);
 
@@ -215,6 +215,66 @@ void TestTransformFeedback3()
 
 
 
+void TestTransformFeedbackVisualizePoint(Graphics::ApplicationWindow* window)
+{
+	// visualizing shader
+	Shaders::ShaderWrapper visualizeShader("..|shaders|point", Shaders::SHADER_TYPE_VGF);
+
+	// TF shader
+	const GLchar* imageTFShaderOutputs[] = { "NewPosition" };
+	Shaders::ShaderWrapper imageTFShader("..|shaders|movePoint",
+		Shaders::TF_SHADER_TYPE_V, imageTFShaderOutputs, 1);
+	imageTFShader.Activate();
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glm::vec2 data[] = { glm::vec2(0.0f, 0.0f) };
+	printf("DATA: (%f, %f)\n", data[0].x, data[0].y);
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+
+	GLint inputAttrib = glGetAttribLocation(imageTFShader.GetShader(), "Position");
+	glEnableVertexAttribArray(inputAttrib);
+	glVertexAttribPointer(inputAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+	GLuint tbo;
+	glGenBuffers(1, &tbo);
+	glBindBuffer(GL_ARRAY_BUFFER, tbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(data), nullptr, GL_STATIC_READ);
+
+	// TRANSFORM FEEDBACK (move point)
+	glEnable(GL_RASTERIZER_DISCARD);
+
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
+	glBeginTransformFeedback(GL_POINTS);
+	glDrawArrays(GL_POINTS, 0, 1);
+	glEndTransformFeedback();
+
+	glDisable(GL_RASTERIZER_DISCARD);
+
+
+	visualizeShader.Activate();
+	glDrawArrays(GL_POINTS, 0, 1);
+	visualizeShader.Deactivate();
+
+
+
+	// cleanup
+	glDeleteBuffers(1, &tbo);
+	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(1, &vao);
+}
+
+
+
+
+
+/*
 void TestTransformFeedback4()
 {
 	//Turn rendering OFF;
@@ -259,3 +319,4 @@ void TestTransformFeedback4()
 	//Swap feedback object IDs
 	swap(m_Current, m_Previous);
 }
+*/

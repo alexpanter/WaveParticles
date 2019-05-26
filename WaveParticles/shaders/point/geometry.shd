@@ -1,0 +1,27 @@
+#version 330 core
+
+layout (points) in;
+layout (triangle_strip, max_vertices = 6) out;
+
+void main()
+{
+	const float halfsize = 0.05f;
+	vec4 pos = gl_in[0].gl_Position;
+
+	vec4 ul = vec4(pos.x - halfsize, pos.y + halfsize, 0.0f, 1.0f);
+	vec4 ur = vec4(pos.x + halfsize, pos.y + halfsize, 0.0f, 1.0f);
+	vec4 ll = vec4(pos.x - halfsize, pos.y - halfsize, 0.0f, 1.0f);
+	vec4 lr = vec4(pos.x + halfsize, pos.y - halfsize, 0.0f, 1.0f);
+
+	// upper left triangle
+	gl_Position = ul; EmitVertex();
+	gl_Position = ur; EmitVertex();
+	gl_Position = ll; EmitVertex();
+	EndPrimitive();
+
+	// lower right triangle
+	gl_Position = ll; EmitVertex();
+	gl_Position = ur; EmitVertex();
+	gl_Position = lr; EmitVertex();
+	EndPrimitive();
+}

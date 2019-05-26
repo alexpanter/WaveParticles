@@ -175,6 +175,10 @@
   <ItemGroup>
     <None Include="..\shaders\image\fragment.shd" />
     <None Include="..\shaders\image\vertex.shd" />
+    <None Include="..\shaders\movePoint\vertex.shd" />
+    <None Include="..\shaders\point\fragment.shd" />
+    <None Include="..\shaders\point\geometry.shd" />
+    <None Include="..\shaders\point\vertex.shd" />
     <None Include="..\shaders\transformFeedback2\geometry.shd" />
     <None Include="..\shaders\transformFeedback2\vertex.shd" />
     <None Include="..\shaders\transformFeedback3\vertex.shd" />

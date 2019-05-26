@@ -1,0 +1,10 @@
+#version 330 core
+
+in vec2 Position;
+out vec2 NewPosition;
+// TODO: use uniform float time;
+
+void main()
+{
+	NewPosition = vec2(Position.x, Position.y + 0.001f);
+}

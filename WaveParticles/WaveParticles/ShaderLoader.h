@@ -117,12 +117,14 @@ namespace Core::Shaders
 		std::vector<GLuint> shaders;
 		const std::string shaderDir = Core::FileIO::getPlatformPath(path);
 
+		/*
 		std::cout << "Testing TF shader outputs:" << std::endl;
 		for (int i = 0; i < numOutputs; i++)
 		{
 			std::cout << outputs[i] << std::endl;
 		}
 		std::cout << std::endl;
+		*/
 
 		switch (type)
 		{

@@ -105,22 +105,49 @@ int main()
 	// TIMER
 	Utilities::MainTimer timer(30, 30);
 
-	// FILE I/O TEST
-	/*std::cout << "platform separator: '" << FileIO::getPlatformSeparator() << "'" << std::endl;
-	std::string contents = FileIO::getPlatformFilePath("..|shaders|image|vertex.shd");
-	std::cout << "read shader: " << FileIO::readFileContents(contents) << std::endl;*/
-
-	// TEST IMAGE
-	Shaders::ShaderWrapper imageShader("..|shaders|image", Shaders::SHADER_TYPE_VF);
-
-	glm::vec2 imageLowerLeft(-0.5, -0.5f);
-	GLfloat imageWidth = 1.0f;
-	GLfloat imageHeight = 1.0f;
-	Graphics::Image image(imageLowerLeft, imageWidth, imageHeight);
-
 
 	// DATA FOR TRANSFORM FEEDBACK
-	TestTransformFeedback3();
+
+	// visualizing shader
+	Shaders::ShaderWrapper visualizeShader("..|shaders|point", Shaders::SHADER_TYPE_VGF);
+
+	// TF shader
+	const GLchar* imageTFShaderOutputs[] = { "NewPosition" };
+	Shaders::ShaderWrapper imageTFShader("..|shaders|movePoint",
+		Shaders::TF_SHADER_TYPE_V, imageTFShaderOutputs, 1);
+	imageTFShader.Activate();
+
+	int read = 0;
+	int write = 1;
+
+	GLuint vao;
+	GLuint tbo[2];
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glm::vec2 data[] = { glm::vec2(0.0f, 0.0f) };
+	printf("DATA: (%f, %f)\n", data[0].x, data[0].y);
+
+	glGenBuffers(2, tbo);
+	glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(data), nullptr, GL_STATIC_DRAW);
+	
+
+	GLint inputAttrib = glGetAttribLocation(imageTFShader.GetShader(), "Position");
+	//glEnableVertexAttribArray(inputAttrib);
+	//glVertexAttribPointer(inputAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+
+	// SETUP VAO FOR RENDERING TF RESULT
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindVertexArray(0);
+	//glBindVertexArray(vao[1]);
+	//glBindBuffer(GL_ARRAY_BUFFER, tbo);
+	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+	//glEnableVertexAttribArray(0);
 
 
 	// GAME LOOP
@@ -143,17 +170,50 @@ int main()
 		if (timer.ShouldRender()) {
 			win->ClearWindow();
 
-			imageShader.Activate();
-			image.Draw();
-			imageShader.Deactivate();
+			// PERFORM TRANSFORM FEEDBACK
+			imageTFShader.Activate();
+			glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
+			glEnableVertexAttribArray(inputAttrib);
+			glVertexAttribPointer(inputAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
+			glEnable(GL_RASTERIZER_DISCARD);
+
+			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo[write]);
+			glBeginTransformFeedback(GL_POINTS);
+			glDrawArrays(GL_POINTS, 0, 1);
+			glEndTransformFeedback();
+
+			glDisable(GL_RASTERIZER_DISCARD);
+			glFlush();
+			imageTFShader.Deactivate();
+
+			// RENDER TRANSFORM FEEDBACK RESULT
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(0);
+
+			visualizeShader.Activate();
+			glDrawArrays(GL_POINTS, 0, 1);
+			visualizeShader.Deactivate();
+
+			// DOUBLE_BUFFERING
 			win->SwapBuffers();
+
+			// SWAPPING TF BUFFERS
+			int temp = read;
+			read = write;
+			write = temp;
 		}
 
 		if (timer.ShouldReset()) {
 			win->SetTitle(timer.GetTimeTitle());
 		}
 	}
+
+	// cleanup
+	glDeleteBuffers(2, tbo);
+	glDeleteVertexArrays(1, &vao);
 
 	delete win;
 	return 0;
