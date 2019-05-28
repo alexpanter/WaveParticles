@@ -163,13 +163,16 @@
     <ClInclude Include="AspectRatio.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FileIO.h" />
+    <ClInclude Include="HeightMap.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="MainTimer.h" />
     <ClInclude Include="OpenGL.h" />
     <ClInclude Include="Particle.h" />
+    <ClInclude Include="RandomGenerator.h" />
     <ClInclude Include="ShaderLoader.h" />
     <ClInclude Include="ShaderType.h" />
     <ClInclude Include="ShaderWrapper.h" />
+    <ClInclude Include="TerrainMesh.h" />
     <ClInclude Include="TestTransformFeedback.h" />
   </ItemGroup>
   <ItemGroup>

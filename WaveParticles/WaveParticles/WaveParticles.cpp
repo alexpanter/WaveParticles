@@ -16,8 +16,11 @@
 #include "ShaderWrapper.h"
 #include "Image.h"
 #include "TestTransformFeedback.h"
+#include "Particle.h"
+#include "RandomGenerator.h"
 
 using namespace Core;
+using namespace Utilities;
 
 
 // WINDOW, CAMERA, AND KEYBOARD
@@ -87,7 +90,7 @@ int main()
 {
 	// WINDOW SETUP
 	win = new Graphics::ApplicationWindow();
-	Graphics::AspectRatio aspect(500, Graphics::ASPECT_RATIO_4_3);
+	Graphics::AspectRatio aspect(800, Graphics::ASPECT_RATIO_1_1);
 	win->SetTitle("Wave Particles");
 	win->SetWindowed(aspect);
 	win->SetKeyCallback(KeyCallback);
@@ -112,9 +115,9 @@ int main()
 	Shaders::ShaderWrapper visualizeShader("..|shaders|point", Shaders::SHADER_TYPE_VGF);
 
 	// TF shader
-	const GLchar* imageTFShaderOutputs[] = { "NewPosition" };
+	const GLchar* imageTFShaderOutputs[] = { "NewPosition", "NewDirection", "NewColor" };
 	Shaders::ShaderWrapper imageTFShader("..|shaders|movePoint",
-		Shaders::TF_SHADER_TYPE_V, imageTFShaderOutputs, 1);
+		Shaders::TF_SHADER_TYPE_V, imageTFShaderOutputs, 3);
 	imageTFShader.Activate();
 
 	int read = 0;
@@ -126,28 +129,21 @@ int main()
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	glm::vec2 data[] = { glm::vec2(0.0f, 0.0f) };
-	printf("DATA: (%f, %f)\n", data[0].x, data[0].y);
+	const int NUM_PARTICLES = 5;
+	WaveParticle data[NUM_PARTICLES];
+	for (int i = 0; i < NUM_PARTICLES; i++)
+	{
+		data[i].Position = glm::vec2(-1.0f, Random::NextFloat(-1.0f, 1.0f));
+		data[i].Direction = glm::vec2(Random::NextFloat(0.005f, 0.05f), 0.0f);
+		data[i].Color = glm::vec4(Random::NextFloat(0.0f, 1.0f), Random::NextFloat(0.0f, 1.0f),
+			Random::NextFloat(0.0f, 1.0f), 1.0f);
+	}
 
 	glGenBuffers(2, tbo);
 	glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(data), nullptr, GL_STATIC_DRAW);
-	
-
-	GLint inputAttrib = glGetAttribLocation(imageTFShader.GetShader(), "Position");
-	//glEnableVertexAttribArray(inputAttrib);
-	//glVertexAttribPointer(inputAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-
-	// SETUP VAO FOR RENDERING TF RESULT
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//glBindVertexArray(0);
-	//glBindVertexArray(vao[1]);
-	//glBindBuffer(GL_ARRAY_BUFFER, tbo);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
 
 
 	// GAME LOOP
@@ -172,15 +168,30 @@ int main()
 
 			// PERFORM TRANSFORM FEEDBACK
 			imageTFShader.Activate();
+			//imageTFShader.SetUniform("time", (GLfloat)glfwGetTime());
 			glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
-			glEnableVertexAttribArray(inputAttrib);
-			glVertexAttribPointer(inputAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+			// position
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle), (GLvoid*)0);
+			glEnableVertexAttribArray(0);
+
+			// direction
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(sizeof(glm::vec2)));
+			glEnableVertexAttribArray(1);
+
+			// color
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(2 * sizeof(glm::vec2)));
+			glEnableVertexAttribArray(2);
 
 			glEnable(GL_RASTERIZER_DISCARD);
 
 			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo[write]);
+			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, tbo[write]);
+			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, tbo[write]);
 			glBeginTransformFeedback(GL_POINTS);
-			glDrawArrays(GL_POINTS, 0, 1);
+			glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
 			glEndTransformFeedback();
 
 			glDisable(GL_RASTERIZER_DISCARD);
@@ -190,11 +201,23 @@ int main()
 			// RENDER TRANSFORM FEEDBACK RESULT
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+
+			// position
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle), (GLvoid*)0);
 			glEnableVertexAttribArray(0);
 
+			// direction
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(sizeof(glm::vec2)));
+			glEnableVertexAttribArray(1);
+
+			// color
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(2 * sizeof(glm::vec2)));
+			glEnableVertexAttribArray(2);
+
 			visualizeShader.Activate();
-			glDrawArrays(GL_POINTS, 0, 1);
+			glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
 			visualizeShader.Deactivate();
 
 			// DOUBLE_BUFFERING

@@ -3,10 +3,14 @@
 layout (points) in;
 layout (triangle_strip, max_vertices = 6) out;
 
+in vec4 color[];
+out vec4 Color;
+
 void main()
 {
-	const float halfsize = 0.05f;
+	const float halfsize = 0.01f;
 	vec4 pos = gl_in[0].gl_Position;
+	Color = color[0];
 
 	vec4 ul = vec4(pos.x - halfsize, pos.y + halfsize, 0.0f, 1.0f);
 	vec4 ur = vec4(pos.x + halfsize, pos.y + halfsize, 0.0f, 1.0f);

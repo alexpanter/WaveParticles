@@ -1,10 +1,28 @@
 #version 330 core
 
-in vec2 Position;
+layout (location = 0) in vec2 Position;
+layout (location = 1) in vec2 Direction;
+layout (location = 2) in vec4 Color;
+
 out vec2 NewPosition;
-// TODO: use uniform float time;
+out vec2 NewDirection;
+out vec4 NewColor;
+
+//uniform float time;
 
 void main()
 {
-	NewPosition = vec2(Position.x, Position.y + 0.001f);
+
+	NewPosition = Position + Direction;
+	NewDirection = Direction;
+	NewColor = Color;
+
+	if(NewPosition.x > 1.0f) {
+		NewDirection *= -1.0f;
+		NewPosition.x = 1.0f;
+	}
+	else if(NewPosition.x < -1.0f) {
+		NewDirection *= -1.0f;
+		NewPosition.x = -1.0f;
+	}
 }
