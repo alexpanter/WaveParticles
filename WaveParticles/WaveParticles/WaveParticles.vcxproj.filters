@@ -34,6 +34,12 @@
     <Filter Include="shaders\movePoint">
       <UniqueIdentifier>{7abac778-ba95-49b3-938d-c47022150651}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders\waveParticles">
+      <UniqueIdentifier>{dc13273a-3166-44cf-b6c6-d68211e1cd11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\waveParticles\finalRenderer">
+      <UniqueIdentifier>{90d3181e-af1e-4828-912a-b7e4d60f5e73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WaveParticles.cpp">
@@ -120,6 +126,12 @@
     </None>
     <None Include="..\shaders\movePoint\vertex.shd">
       <Filter>shaders\movePoint</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\finalRenderer\fragment.shd">
+      <Filter>shaders\waveParticles\finalRenderer</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\finalRenderer\vertex.shd">
+      <Filter>shaders\waveParticles\finalRenderer</Filter>
     </None>
   </ItemGroup>
 </Project>

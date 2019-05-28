@@ -17,12 +17,10 @@ void main()
 	NewDirection = Direction;
 	NewColor = Color;
 
-	if(NewPosition.x > 1.0f) {
-		NewDirection *= -1.0f;
-		NewPosition.x = 1.0f;
+	if(abs(NewPosition.x) > 1.0f) {
+		NewDirection.x *= -1.0f;
 	}
-	else if(NewPosition.x < -1.0f) {
-		NewDirection *= -1.0f;
-		NewPosition.x = -1.0f;
+	if(abs(NewPosition.y) > 1.0f) {
+		NewDirection.y *= -1.0f;
 	}
 }

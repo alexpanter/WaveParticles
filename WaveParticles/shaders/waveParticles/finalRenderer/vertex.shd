@@ -1,0 +1,49 @@
+//
+// This shader runs for each grid coordinate in the water height map.
+//
+
+#version 330 core
+
+layout (location = 0) in vec2 gridCoordinate;
+
+// use worldPos.xy to look up inside the height map
+uniform sampler2D particleHeightMap;
+
+uniform mat4 perspective;
+uniform mat4 view;
+uniform float waterHeight;
+uniform float gridSize; // assume gridSize == width == length
+
+out vec3 worldPos;
+// out vec3 worldNormal;
+
+void main()
+{
+	vec3 position = vec3(gridCoordinate, waterHeight);
+	vec2 texCoord = gridCoordinate / gridSize;
+	float texStep = 1.0f / gridSize;
+
+	for(int i = 0; i < 2; i++)
+	{
+		for(int j = 0; j < 2; j++)
+		{
+			vec2 texel = vec2(texCoord.x + i * texStep, texCoord.y + j * texStep);
+			vec4 waveContribution = texture(particleHeightMap, texel);
+
+			// calculate contribution from each particle surrounding [texCoord]
+			// will be some multiplication with the distance to the wave center
+			// or something...
+			//
+			// could be clever to test if point is behind the wave, since then
+			// the height contribution should be negative. If done correctly,
+			// this would eliminate the need for manually setting every field
+			// of the height map to zero before calculating wave propagations.
+
+			vec3 result = waveContribution.xyz;
+			position += result; // both horizontal and vertical wave deformation
+		}
+	}
+
+	gl_Position = perspective * view * vec4(position, 1.0f);
+	worldPos = position;
+}

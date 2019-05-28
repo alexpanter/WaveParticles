@@ -129,12 +129,12 @@ int main()
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	const int NUM_PARTICLES = 5;
+	const int NUM_PARTICLES = 30;
 	WaveParticle data[NUM_PARTICLES];
 	for (int i = 0; i < NUM_PARTICLES; i++)
 	{
 		data[i].Position = glm::vec2(-1.0f, Random::NextFloat(-1.0f, 1.0f));
-		data[i].Direction = glm::vec2(Random::NextFloat(0.005f, 0.05f), 0.0f);
+		data[i].Direction = glm::vec2(Random::NextFloat(0.005f, 0.025f), Random::NextFloat(0.005f, 0.025f));
 		data[i].Color = glm::vec4(Random::NextFloat(0.0f, 1.0f), Random::NextFloat(0.0f, 1.0f),
 			Random::NextFloat(0.0f, 1.0f), 1.0f);
 	}

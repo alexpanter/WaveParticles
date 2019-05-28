@@ -186,6 +186,8 @@
     <None Include="..\shaders\transformFeedback2\vertex.shd" />
     <None Include="..\shaders\transformFeedback3\vertex.shd" />
     <None Include="..\shaders\transformFeedback\vertex.shd" />
+    <None Include="..\shaders\waveParticles\finalRenderer\fragment.shd" />
+    <None Include="..\shaders\waveParticles\finalRenderer\vertex.shd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
