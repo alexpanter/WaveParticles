@@ -26,3 +26,31 @@ public:
 			;
 	}
 };
+
+class PackedWaveParticle
+{
+public:
+	// (Position.x, Position.y, PropagationAngle, DispersionAngle)
+	glm::vec4 paramVec1;
+
+	// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
+	glm::vec4 paramVec2;
+
+	// (Radius, Amplitude, nBorderFrames)
+	glm::vec4 paramVec3;
+
+	/*
+	* Position.x
+	* Position.y
+	*
+	* Origin.x
+	* Origin.y
+	* TimeAtOrigin
+	* PropagationAngle
+	*
+	* Amplitude
+	* Radius
+	* Speed / AmplitudeSign
+	* DispersionAngle
+	*/
+};

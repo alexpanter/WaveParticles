@@ -1,0 +1,55 @@
+//
+// Particle propagation
+//
+
+#version 330 core
+
+#define ONE_THIRD (1.0f / 3.0f)
+
+layout (points) in;
+layout (points, max_vertices = 3) out;
+
+in vec4 outParamVec1[];
+in vec4 outParamVec2[];
+in vec4 outParamVec3[];
+
+out vec4 paramVec1;
+out vec4 paramVec2;
+out vec4 paramVec3;
+
+in ivec2 action[]; // (delete, subdivide)
+
+void main()
+{
+	// delete particle
+	if(action[0].x > 0) return;
+
+	// copy data
+	paramVec1 = outParamVec1[0];
+	paramVec2 = outParamVec2[0];
+	paramVec3 = outParamVec3[0];
+
+	//float T_w =  outParamVec3[0].x * 0.5f; // Mikes Daniel do not use this!!?
+
+	if(action[0].y > 0) {
+		paramVec1.w *= ONE_THIRD;// * T_w;
+		paramVec3.y *= ONE_THIRD;
+	}
+	EmitVertex();
+	EndPrimitive();
+	
+	if(action[0].y > 0) {
+		vec2 dispersionAngleXY = vec2(cos(outParamVec1[0].w), sin(outParamVec1[0].w));
+		vec2 dispersionDirection = (paramVec1.xy - paramVec2.xy) * dispersionAngleXY;
+
+		paramVec1.z = outParamVec1[0].z + paramVec1.w;
+		paramVec1.xy = paramVec2.xy + dispersionDirection;
+		EmitVertex();
+		EndPrimitive();
+
+		paramVec1.z = outParamVec1[0].z - paramVec1.w;
+		paramVec1.xy = paramVec2.xy - dispersionDirection;
+		EmitVertex();
+		EndPrimitive();
+	}
+}

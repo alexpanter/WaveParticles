@@ -40,12 +40,18 @@
     <Filter Include="shaders\waveParticles\finalRenderer">
       <UniqueIdentifier>{90d3181e-af1e-4828-912a-b7e4d60f5e73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders\waveParticles\particlePropagation">
+      <UniqueIdentifier>{9ee3d603-b65f-4876-b97d-b384ae23c9d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WaveParticles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="2DParticleSimulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -132,6 +138,12 @@
     </None>
     <None Include="..\shaders\waveParticles\finalRenderer\vertex.shd">
       <Filter>shaders\waveParticles\finalRenderer</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\particlePropagation\geometry.shd">
+      <Filter>shaders\waveParticles\particlePropagation</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\particlePropagation\vertex.shd">
+      <Filter>shaders\waveParticles\particlePropagation</Filter>
     </None>
   </ItemGroup>
 </Project>

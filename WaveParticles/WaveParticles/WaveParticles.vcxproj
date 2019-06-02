@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="2DParticleSimulator.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="WaveParticles.cpp" />
   </ItemGroup>
@@ -188,6 +189,8 @@
     <None Include="..\shaders\transformFeedback\vertex.shd" />
     <None Include="..\shaders\waveParticles\finalRenderer\fragment.shd" />
     <None Include="..\shaders\waveParticles\finalRenderer\vertex.shd" />
+    <None Include="..\shaders\waveParticles\particlePropagation\geometry.shd" />
+    <None Include="..\shaders\waveParticles\particlePropagation\vertex.shd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,13 +1,18 @@
 #version 330 core
 
-layout (location = 0) in vec2 Position;
-layout (location = 1) in vec2 Direction;
-layout (location = 2) in vec4 Color;
+// (Position.x, Position.y, PropagationAngle, DispersionAngle)
+layout (location = 0) in vec4 paramVec1;
 
-out vec4 color;
+// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
+layout (location = 1) in vec4 paramVec2;
+
+// (Radius, Amplitude, nBorderFrames)
+layout (location = 2) in vec4 paramVec3;
+
+out float amplitude;
 
 void main()
 {
-	gl_Position = vec4(Position, 0.0f, 1.0f);
-	color = Color;
+	gl_Position = vec4(paramVec1.xy, 0.0f, 1.0f);
+	amplitude = paramVec3.y;
 }

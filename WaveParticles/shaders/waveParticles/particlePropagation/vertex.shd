@@ -1,0 +1,55 @@
+//
+// Particle propagation
+//
+
+#version 330 core
+
+#define DAMPING_COEFFICIENT 0.001f
+
+// (Position.x, Position.y, PropagationAngle, DispersionAngle)
+layout (location = 0) in vec4 paramVec1;
+
+// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
+layout (location = 1) in vec4 paramVec2;
+
+// (Radius, Amplitude, nBorderFrames)
+layout (location = 2) in vec4 paramVec3;
+
+// output same set of attributes after particle propagation, plus action to take
+out vec4 outParamVec1;
+out vec4 outParamVec2;
+out vec4 outParamVec3;
+out ivec2 action; // (delete, subdivide)
+
+uniform float time;
+
+void main()
+{
+	float velocity = abs(paramVec2.w);
+	float timeDelta = time - paramVec2.z;
+	action = ivec2(0, 0);
+
+	// update paramVec1
+	outParamVec1.x = paramVec1.x + cos(paramVec1.z) * velocity;
+	outParamVec1.y = paramVec1.y + sin(paramVec1.z) * velocity;
+	outParamVec1.zw = paramVec1.zw;
+
+	// update paramVec2
+	outParamVec2 = paramVec2;
+
+	// update paramVec3
+	outParamVec3 = paramVec3;
+
+	// boundary reflections ...
+
+	// amplitude damping (optional, to model viscosity)
+	float amplitudeDamped = paramVec3.y * exp(-DAMPING_COEFFICIENT * timeDelta);
+	outParamVec3.y = amplitudeDamped;
+
+	// should this particle delete, will be true if the amplitude changes sign
+	if(outParamVec3.y * sign(paramVec2.w) < 0) action.x = 1;
+
+	// should this particle subdivide
+	float d_t = paramVec1.w * velocity * timeDelta;
+	if(d_t > paramVec3.x * 0.5f) action.y = 1;
+}

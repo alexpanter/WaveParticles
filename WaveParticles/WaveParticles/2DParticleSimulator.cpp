@@ -1,4 +1,7 @@
-﻿// disable stupid compile errors with sscanf unsafe
+#ifdef NOT_DEFINED_INVALID_OTHER_ENTRY_POINT
+
+
+// disable stupid compile errors with sscanf unsafe
 // (yes I know it is unsafe, but I take care when I use it!)
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -94,7 +97,7 @@ int main()
 	win->SetTitle("Wave Particles");
 	win->SetWindowed(aspect);
 	win->SetKeyCallback(KeyCallback);
-	
+
 	// OPENGL
 	OpenGL::PrintRendererInfo();
 
@@ -115,11 +118,9 @@ int main()
 	Shaders::ShaderWrapper visualizeShader("..|shaders|point", Shaders::SHADER_TYPE_VGF);
 
 	// TF shader
-	const GLchar* imageTFShaderOutputs[] = { 
-		"paramVec1", "paramVec2", "paramVec3" 
-	};
-	Shaders::ShaderWrapper imageTFShader("..|shaders|waveParticles|particlePropagation",
-		Shaders::TF_SHADER_TYPE_VG, imageTFShaderOutputs, 3);
+	const GLchar* imageTFShaderOutputs[] = { "NewPosition", "NewDirection", "NewColor" };
+	Shaders::ShaderWrapper imageTFShader("..|shaders|movePoint",
+		Shaders::TF_SHADER_TYPE_V, imageTFShaderOutputs, 3);
 	imageTFShader.Activate();
 
 	int read = 0;
@@ -131,17 +132,15 @@ int main()
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	const int MAX_PARTICLES = 10000;
-	const int NUM_PARTICLES = 1;
-	PackedWaveParticle data[NUM_PARTICLES];
-	
-	// (Position.x, Position.y, PropagationAngle, DispersionAngle)
-	data[0].paramVec1 = glm::vec4(0.0f, 0.0f, glm::pi<GLfloat>() * 0.25f, glm::pi<GLfloat>());
-	// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
-	data[0].paramVec2 = glm::vec4(0.0f, 0.0f, glfwGetTime(), 0.001f);
-	// (Radius, Amplitude, nBorderFrames)
-	data[0].paramVec3 = glm::vec4(0.1f, 0.1f, 0.0f, 0.0f); // TODO: Radius in NDC instead??
-
+	const int NUM_PARTICLES = 30;
+	WaveParticle data[NUM_PARTICLES];
+	for (int i = 0; i < NUM_PARTICLES; i++)
+	{
+		data[i].Position = glm::vec2(-1.0f, Random::NextFloat(-1.0f, 1.0f));
+		data[i].Direction = glm::vec2(Random::NextFloat(0.005f, 0.025f), Random::NextFloat(0.005f, 0.025f));
+		data[i].Color = glm::vec4(Random::NextFloat(0.0f, 1.0f), Random::NextFloat(0.0f, 1.0f),
+			Random::NextFloat(0.0f, 1.0f), 1.0f);
+	}
 
 	glGenBuffers(2, tbo);
 	glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
@@ -166,32 +165,27 @@ int main()
 			cam->CalculateViewProjection();
 			std::cout << "Move camera!" << std::endl;
 		}
-		
+
 		if (timer.ShouldRender()) {
 			win->ClearWindow();
 
 			// PERFORM TRANSFORM FEEDBACK
-
-			// OBS: Remember to set gl point size so that several fragments are
-			// generated for each particle!
-
 			imageTFShader.Activate();
-			imageTFShader.SetUniform("time", (GLfloat)glfwGetTime());
+			//imageTFShader.SetUniform("time", (GLfloat)glfwGetTime());
 			glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
 
-			// (Position.x, Position.y, PropagationAngle, DispersionAngle)
-			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
-				(GLvoid*)0);
+			// position
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle), (GLvoid*)0);
 			glEnableVertexAttribArray(0);
 
-			// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
-				(GLvoid*)(sizeof(glm::vec4)));
+			// direction
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(sizeof(glm::vec2)));
 			glEnableVertexAttribArray(1);
 
-			// (Radius, Amplitude, nBorderFrames)
-			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
-				(GLvoid*)(2 * sizeof(glm::vec4)));
+			// color
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(2 * sizeof(glm::vec2)));
 			glEnableVertexAttribArray(2);
 
 			glEnable(GL_RASTERIZER_DISCARD);
@@ -199,56 +193,30 @@ int main()
 			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo[write]);
 			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, tbo[write]);
 			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, tbo[write]);
-
-			GLuint queryObject;
-			GLuint primitivesWritten = 0;
-			glGenQueries(1, &queryObject);
-			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryObject);
-
 			glBeginTransformFeedback(GL_POINTS);
 			glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
 			glEndTransformFeedback();
-
-			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
-			glGetQueryObjectuiv(queryObject, GL_QUERY_RESULT, &primitivesWritten);
-			glDeleteQueries(1, &queryObject);
 
 			glDisable(GL_RASTERIZER_DISCARD);
 			glFlush();
 			imageTFShader.Deactivate();
 
-			//std::cout << "primitives written: " << primitivesWritten << std::endl;
-
-
-			// Enable additive blending, such that fragments are not overwritten
-			// but blended (added) together
-			glEnable(GL_BLEND);
-			glBlendEquation(GL_FUNC_ADD);
-
-			// now particles can be rendered onto the 'wave particle distribution texture',
-			// which for each texel contains information about neighbouring particles
-
-
-
-
-
 			// RENDER TRANSFORM FEEDBACK RESULT
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
 
-			// (Position.x, Position.y, PropagationAngle, DispersionAngle)
-			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
-				(GLvoid*)0);
+			// position
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle), (GLvoid*)0);
 			glEnableVertexAttribArray(0);
 
-			// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
-				(GLvoid*)(sizeof(glm::vec4)));
+			// direction
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(sizeof(glm::vec2)));
 			glEnableVertexAttribArray(1);
 
-			// (Radius, Amplitude, nBorderFrames)
-			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
-				(GLvoid*)(2 * sizeof(glm::vec4)));
+			// color
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(WaveParticle),
+				(GLvoid*)(2 * sizeof(glm::vec2)));
 			glEnableVertexAttribArray(2);
 
 			visualizeShader.Activate();
@@ -276,3 +244,6 @@ int main()
 	delete win;
 	return 0;
 }
+
+
+#endif
