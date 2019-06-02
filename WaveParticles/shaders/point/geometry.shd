@@ -7,8 +7,8 @@ in float amplitude[];
 
 void main()
 {
-	//const float halfsize = 0.05;
-	float halfsize = amplitude[0];
+	//const float halfsize = 0.01;
+	float halfsize = amplitude[0] * 100.0f;
 	vec4 pos = gl_in[0].gl_Position;
 
 	vec4 ul = vec4(pos.x - halfsize, pos.y + halfsize, 0.0f, 1.0f);

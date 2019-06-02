@@ -37,7 +37,7 @@ void main()
 	}
 	EmitVertex();
 	EndPrimitive();
-	
+
 	if(action[0].y > 0) {
 		vec2 dispersionAngleXY = vec2(cos(outParamVec1[0].w), sin(outParamVec1[0].w));
 		vec2 dispersionDirection = (paramVec1.xy - paramVec2.xy) * dispersionAngleXY;

@@ -35,7 +35,7 @@ public:
 
 	// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
 	glm::vec4 paramVec2;
-
+	  
 	// (Radius, Amplitude, nBorderFrames)
 	glm::vec4 paramVec3;
 

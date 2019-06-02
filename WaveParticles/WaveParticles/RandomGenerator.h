@@ -92,8 +92,8 @@ namespace Utilities
 
 		GLfloat NextFloat()
 		{
-			GLfloat min = std::numeric_limits<GLfloat>::min();
-			GLfloat max = std::numeric_limits<GLfloat>::max();
+			constexpr GLfloat min = std::numeric_limits<GLfloat>::min();
+			constexpr GLfloat max = std::numeric_limits<GLfloat>::max();
 			return RandomGenerator<GLfloat>::GetInstance().NextRandomValue(min, max);
 		}
 
@@ -103,7 +103,7 @@ namespace Utilities
 		}
 
 		GLfloat NextPositiveFloat() {
-			GLfloat max = std::numeric_limits<GLfloat>::max();
+			constexpr GLfloat max = std::numeric_limits<GLfloat>::max();
 			return RandomGenerator<GLfloat>::GetInstance().NextRandomValue(0.0f, max);
 		}
 
@@ -113,7 +113,7 @@ namespace Utilities
 		}
 
 		GLfloat NextNegativeFloat() {
-			GLfloat min = std::numeric_limits<GLfloat>::min();
+			constexpr GLfloat min = std::numeric_limits<GLfloat>::min();
 			return RandomGenerator<GLfloat>::GetInstance().NextRandomValue(min, 0.0f);
 		}
 

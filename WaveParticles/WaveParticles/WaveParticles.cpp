@@ -131,24 +131,82 @@ int main()
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	const int MAX_PARTICLES = 10000;
-	const int NUM_PARTICLES = 1;
+	const int MAX_PARTICLES = 500000;
+	const int NUM_PARTICLES = 50;
 	PackedWaveParticle data[NUM_PARTICLES];
+	const GLsizeiptr numParticlesSize = NUM_PARTICLES * sizeof(PackedWaveParticle);
+	const GLsizeiptr particleBufferSize = MAX_PARTICLES * sizeof(PackedWaveParticle);
+
+	for (int i = 0; i < NUM_PARTICLES; i++)
+	{
+		GLfloat posX = Random::NextFloat(-1.0f, 1.0f);
+		GLfloat posY = Random::NextFloat(-1.0f, 1.0f);
+
+		data[i].paramVec1 = glm::vec4(posX, posY, 0, glm::pi<GLfloat>() * 2.0f);
+		data[i].paramVec2 = glm::vec4(posX, posY, glfwGetTime(), 0.3f);
+		data[i].paramVec3 = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
+	}
 	
+	/* COMMENT BACK TO CREATE 5 STATICALLY POSITIONED PARTICLES
+	// PARTICLE 1
 	// (Position.x, Position.y, PropagationAngle, DispersionAngle)
-	data[0].paramVec1 = glm::vec4(0.0f, 0.0f, glm::pi<GLfloat>() * 0.25f, glm::pi<GLfloat>());
+	data[0].paramVec1 = glm::vec4(0.0f, 0.0f, 0, glm::pi<GLfloat>() * 2.0f);
 	// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
-	data[0].paramVec2 = glm::vec4(0.0f, 0.0f, glfwGetTime(), 0.001f);
+	data[0].paramVec2 = glm::vec4(0.0f, 0.0f, glfwGetTime(), 0.3f);
 	// (Radius, Amplitude, nBorderFrames)
-	data[0].paramVec3 = glm::vec4(0.1f, 0.1f, 0.0f, 0.0f); // TODO: Radius in NDC instead??
+	data[0].paramVec3 = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f); // TODO: Radius in NDC ??
+
+	// PARTICLE 2
+	data[1].paramVec1 = glm::vec4(-0.5f, 0.5f, 0, glm::pi<GLfloat>() * 2.0f);
+	data[1].paramVec2 = glm::vec4(-0.5f, 0.5f, glfwGetTime(), 0.3f);
+	data[1].paramVec3 = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
+
+	// PARTICLE 3
+	data[2].paramVec1 = glm::vec4(0.5f, 0.5f, 0, glm::pi<GLfloat>() * 2.0f);
+	data[2].paramVec2 = glm::vec4(0.5f, 0.5f, glfwGetTime(), 0.3f);
+	data[2].paramVec3 = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
+
+	// PARTICLE 4
+	data[3].paramVec1 = glm::vec4(0.5f, -0.5f, 0, glm::pi<GLfloat>() * 2.0f);
+	data[3].paramVec2 = glm::vec4(0.5f, -0.5f, glfwGetTime(), 0.3f);
+	data[3].paramVec3 = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
+
+	// PARTICLE 5
+	data[4].paramVec1 = glm::vec4(-0.5f, -0.5f, 0, glm::pi<GLfloat>() * 2.0f);
+	data[4].paramVec2 = glm::vec4(-0.5f, -0.5f, glfwGetTime(), 0.3f);
+	data[4].paramVec3 = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
+	*/
 
 
 	glGenBuffers(2, tbo);
 	glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(data), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, particleBufferSize, nullptr, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, numParticlesSize, data);
 
+	// void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid * data);
+	//
+	// target : Specifies the target buffer object.The symbolic constant must be 
+	//          GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_PIXEL_PACK_BUFFER, or
+	//          GL_PIXEL_UNPACK_BUFFER.
+	// offset : Specifies the offset into the buffer object's data store where data
+	//          replacement will begin, measured in bytes.
+	// size : Specifies the size in bytes of the data store region being replaced.
+	// data : Specifies a pointer to the new data that will be copied into the data store.
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
+	glBufferData(GL_ARRAY_BUFFER, particleBufferSize, nullptr, GL_STATIC_DRAW);
+
+	// query Transform Feedback (TF) number of particles output
+	GLuint nParticlesAlive = NUM_PARTICLES;
+	GLuint nParticlesAliveQueryObject;
+	glGenQueries(1, &nParticlesAliveQueryObject);
+
+	// query TF shader running time
+	GLint64 timeElapsedTFShader = 0;
+	double timeElapsedMilliseconds = 0;
+	GLuint timeElapsedTFShaderQueryObject;
+	glGenQueries(1, &timeElapsedTFShaderQueryObject);
 
 	// GAME LOOP
 	while (win->IsRunning())
@@ -200,30 +258,31 @@ int main()
 			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, tbo[write]);
 			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, tbo[write]);
 
-			GLuint queryObject;
-			GLuint primitivesWritten = 0;
-			glGenQueries(1, &queryObject);
-			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryObject);
-
-			glBeginTransformFeedback(GL_POINTS);
-			glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
-			glEndTransformFeedback();
-
+			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, nParticlesAliveQueryObject);
+			glBeginQuery(GL_TIME_ELAPSED, timeElapsedTFShaderQueryObject);
+			{
+				glBeginTransformFeedback(GL_POINTS);
+				glDrawArrays(GL_POINTS, 0, nParticlesAlive);
+				glEndTransformFeedback();
+			}
+			glEndQuery(GL_TIME_ELAPSED);
 			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
-			glGetQueryObjectuiv(queryObject, GL_QUERY_RESULT, &primitivesWritten);
-			glDeleteQueries(1, &queryObject);
+
+			glGetQueryObjectuiv(nParticlesAliveQueryObject, GL_QUERY_RESULT, &nParticlesAlive);
+			glGetQueryObjecti64v(timeElapsedTFShaderQueryObject, GL_QUERY_RESULT,
+				&timeElapsedTFShader);
 
 			glDisable(GL_RASTERIZER_DISCARD);
 			glFlush();
 			imageTFShader.Deactivate();
 
-			//std::cout << "primitives written: " << primitivesWritten << std::endl;
+			//std::cout << "primitives written: " << nParticlesAlive << std::endl;
 
 
 			// Enable additive blending, such that fragments are not overwritten
 			// but blended (added) together
-			glEnable(GL_BLEND);
-			glBlendEquation(GL_FUNC_ADD);
+			//glEnable(GL_BLEND);
+			//glBlendEquation(GL_FUNC_ADD);
 
 			// now particles can be rendered onto the 'wave particle distribution texture',
 			// which for each texel contains information about neighbouring particles
@@ -252,7 +311,7 @@ int main()
 			glEnableVertexAttribArray(2);
 
 			visualizeShader.Activate();
-			glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
+			glDrawArrays(GL_POINTS, 0, nParticlesAlive);
 			visualizeShader.Deactivate();
 
 			// DOUBLE_BUFFERING
@@ -265,11 +324,16 @@ int main()
 		}
 
 		if (timer.ShouldReset()) {
-			win->SetTitle(timer.GetTimeTitle());
+			timeElapsedMilliseconds = timeElapsedTFShader / 1000000.0;
+			win->SetTitle(timer.GetTimeTitle() + " | particles alive: "
+				+ std::to_string(nParticlesAlive)
+				+ " | TF shader time (ms): " + std::to_string(timeElapsedMilliseconds));
+			std::cout << "wefew" << win->GetTitle() << std::endl;
 		}
 	}
 
 	// cleanup
+	glDeleteQueries(1, &nParticlesAliveQueryObject);
 	glDeleteBuffers(2, tbo);
 	glDeleteVertexArrays(1, &vao);
 

@@ -26,12 +26,13 @@ uniform float time;
 void main()
 {
 	float velocity = abs(paramVec2.w);
-	float timeDelta = time - paramVec2.z;
+	float timeSinceOrigin = time - paramVec2.z;
 	action = ivec2(0, 0);
 
 	// update paramVec1
-	outParamVec1.x = paramVec1.x + cos(paramVec1.z) * velocity;
-	outParamVec1.y = paramVec1.y + sin(paramVec1.z) * velocity;
+	outParamVec1.x = paramVec2.x + cos(paramVec1.z) * velocity * timeSinceOrigin;
+	outParamVec1.y = paramVec2.y + sin(paramVec1.z) * velocity * timeSinceOrigin;
+
 	outParamVec1.zw = paramVec1.zw;
 
 	// update paramVec2
@@ -41,15 +42,32 @@ void main()
 	outParamVec3 = paramVec3;
 
 	// boundary reflections ...
+	if(abs(outParamVec1.x) > 1.0f) {
+		float normal = acos(-sign(outParamVec1.x));
+		float angle = paramVec1.z + acos(-1.0f);
+		outParamVec1.z = angle - 2.0f * (angle - normal); // reflect propagation angle
+
+		outParamVec2.xy = vec2(sign(outParamVec1.x), outParamVec1.y); // origin <- position
+		outParamVec2.z = time; // time at origin <- now time
+	} 
+	if(abs(outParamVec1.y) > 1.0f) {
+		float normal = asin(-sign(outParamVec1.y));
+		float angle = paramVec1.z + acos(-1.0f);
+		outParamVec1.z = angle - 2.0f * (angle - normal); // reflect propagation angle
+
+		outParamVec2.xy = vec2(outParamVec1.x, sign(outParamVec1.y)); // origin <- position
+		outParamVec2.z = time; // time at origin <- now time
+	}
 
 	// amplitude damping (optional, to model viscosity)
-	float amplitudeDamped = paramVec3.y * exp(-DAMPING_COEFFICIENT * timeDelta);
+	float amplitudeDamped = paramVec3.y * exp(-DAMPING_COEFFICIENT * timeSinceOrigin);
 	outParamVec3.y = amplitudeDamped;
 
-	// should this particle delete, will be true if the amplitude changes sign
-	if(outParamVec3.y * sign(paramVec2.w) < 0) action.x = 1;
+	// should this particle delete, will be true if the amplitude changes sign,
+	// or if the amplitude falls below a certain threshold < 0.001f
+	if(outParamVec3.y * sign(paramVec2.w) < 0 || outParamVec3.y < 1e-6) action.x = 1;
 
 	// should this particle subdivide
-	float d_t = paramVec1.w * velocity * timeDelta;
+	float d_t = paramVec1.w * velocity * timeSinceOrigin;
 	if(d_t > paramVec3.x * 0.5f) action.y = 1;
 }
