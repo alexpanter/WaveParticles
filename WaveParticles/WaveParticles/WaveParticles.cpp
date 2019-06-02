@@ -132,7 +132,7 @@ int main()
 	glBindVertexArray(vao);
 
 	const int MAX_PARTICLES = 500000;
-	const int NUM_PARTICLES = 50;
+	const int NUM_PARTICLES = 5;
 	PackedWaveParticle data[NUM_PARTICLES];
 	const GLsizeiptr numParticlesSize = NUM_PARTICLES * sizeof(PackedWaveParticle);
 	const GLsizeiptr particleBufferSize = MAX_PARTICLES * sizeof(PackedWaveParticle);
@@ -328,7 +328,7 @@ int main()
 			win->SetTitle(timer.GetTimeTitle() + " | particles alive: "
 				+ std::to_string(nParticlesAlive)
 				+ " | TF shader time (ms): " + std::to_string(timeElapsedMilliseconds));
-			std::cout << "wefew" << win->GetTitle() << std::endl;
+			std::cout << win->GetTitle() << std::endl;
 		}
 	}
 
