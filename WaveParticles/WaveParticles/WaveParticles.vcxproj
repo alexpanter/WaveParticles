@@ -187,8 +187,10 @@
     <None Include="..\shaders\transformFeedback2\vertex.shd" />
     <None Include="..\shaders\transformFeedback3\vertex.shd" />
     <None Include="..\shaders\transformFeedback\vertex.shd" />
-    <None Include="..\shaders\waveParticles\finalRenderer\fragment.shd" />
-    <None Include="..\shaders\waveParticles\finalRenderer\vertex.shd" />
+    <None Include="..\shaders\waveParticles\distributionTextureCleanup\fragment.shd" />
+    <None Include="..\shaders\waveParticles\distributionTextureCleanup\vertex.shd" />
+    <None Include="..\shaders\waveParticles\particleBlending\fragment.shd" />
+    <None Include="..\shaders\waveParticles\particleBlending\vertex.shd" />
     <None Include="..\shaders\waveParticles\particlePropagation\geometry.shd" />
     <None Include="..\shaders\waveParticles\particlePropagation\vertex.shd" />
   </ItemGroup>

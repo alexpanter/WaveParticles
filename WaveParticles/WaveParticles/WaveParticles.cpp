@@ -108,6 +108,47 @@ int main()
 	// TIMER
 	Utilities::MainTimer timer(30, 30);
 
+	// WAVE PARTICLE DISTRIBUTION TEXTURE - CLEANUP
+	Shaders::ShaderWrapper wpdTextureCleanupShader(
+		"..|shaders|waveParticles|distributionTextureCleanup", Shaders::SHADER_TYPE_VF);
+
+	GLfloat wpdTextureCleanupQuadData[] = {
+		// lower-left triangle
+		-1.0f, 1.0f,
+		1.0f, 1.0f,
+		-1.0f, -1.0f,
+		// upper-right triangle
+		1.0f, 1.0f,
+		1.0f, -1.0f,
+		-1.0f, -1.0f
+	};
+	GLuint wpdTextureVAO;
+	GLuint wpdTextureVBO;
+	glGenVertexArrays(1, &wpdTextureVAO);
+	glBindVertexArray(wpdTextureVAO);
+
+	glGenBuffers(1, &wpdTextureVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, wpdTextureVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(wpdTextureCleanupQuadData),
+		wpdTextureCleanupQuadData, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+
+
+
+	// WAVE PARTICLE DISTRIBUTION TEXTURE - BLENDING
+	Shaders::ShaderWrapper wpdTextureParticleBlendingShader(
+		"..|shaders|waveParticles|particleBlending", Shaders::SHADER_TYPE_VF);
+
+
+
+
+
+
 
 	// DATA FOR TRANSFORM FEEDBACK
 
@@ -228,10 +269,8 @@ int main()
 		if (timer.ShouldRender()) {
 			win->ClearWindow();
 
-			// PERFORM TRANSFORM FEEDBACK
 
-			// OBS: Remember to set gl point size so that several fragments are
-			// generated for each particle!
+			// PERFORM TRANSFORM FEEDBACK
 
 			imageTFShader.Activate();
 			imageTFShader.SetUniform("time", (GLfloat)glfwGetTime());
@@ -279,13 +318,49 @@ int main()
 			//std::cout << "primitives written: " << nParticlesAlive << std::endl;
 
 
-			// Enable additive blending, such that fragments are not overwritten
-			// but blended (added) together
-			//glEnable(GL_BLEND);
-			//glBlendEquation(GL_FUNC_ADD);
+			
 
 			// now particles can be rendered onto the 'wave particle distribution texture',
 			// which for each texel contains information about neighbouring particles
+
+			// OBS: Remember to set gl point size so that several fragments are
+			// generated for each particle!
+
+
+			// RENDER WAVE PARTICLE DISTRIBUTION TEXTURE
+
+			// first, the texture needs to be cleaned from previous operations
+
+
+
+			// set attribute pointers
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
+
+			// (Position.x, Position.y, PropagationAngle, DispersionAngle)
+			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
+				(GLvoid*)0);
+			glEnableVertexAttribArray(0);
+
+			// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
+				(GLvoid*)(sizeof(glm::vec4)));
+			glEnableVertexAttribArray(1);
+
+			// (Radius, Amplitude, nBorderFrames)
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(PackedWaveParticle),
+				(GLvoid*)(2 * sizeof(glm::vec4)));
+			glEnableVertexAttribArray(2);
+
+			// Enable additive blending, such that fragments are not overwritten
+			// but blended (added) together
+
+			GLboolean isBlendingEnabled;
+			glGetBooleanv(GL_BLEND, &isBlendingEnabled);
+
+			glEnable(GL_BLEND);
+			glBlendEquation(GL_FUNC_ADD);
+
 
 
 

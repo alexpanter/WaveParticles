@@ -37,11 +37,14 @@
     <Filter Include="shaders\waveParticles">
       <UniqueIdentifier>{dc13273a-3166-44cf-b6c6-d68211e1cd11}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shaders\waveParticles\finalRenderer">
-      <UniqueIdentifier>{90d3181e-af1e-4828-912a-b7e4d60f5e73}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shaders\waveParticles\particlePropagation">
       <UniqueIdentifier>{9ee3d603-b65f-4876-b97d-b384ae23c9d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\waveParticles\particleBlending">
+      <UniqueIdentifier>{8bed190e-bdd3-4c88-a6de-0e06843617be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\waveParticles\distributionTextureCleanup">
+      <UniqueIdentifier>{1f1e6529-1bba-436a-aee9-9d9b7194184e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -133,17 +136,23 @@
     <None Include="..\shaders\movePoint\vertex.shd">
       <Filter>shaders\movePoint</Filter>
     </None>
-    <None Include="..\shaders\waveParticles\finalRenderer\fragment.shd">
-      <Filter>shaders\waveParticles\finalRenderer</Filter>
-    </None>
-    <None Include="..\shaders\waveParticles\finalRenderer\vertex.shd">
-      <Filter>shaders\waveParticles\finalRenderer</Filter>
-    </None>
     <None Include="..\shaders\waveParticles\particlePropagation\geometry.shd">
       <Filter>shaders\waveParticles\particlePropagation</Filter>
     </None>
     <None Include="..\shaders\waveParticles\particlePropagation\vertex.shd">
       <Filter>shaders\waveParticles\particlePropagation</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\particleBlending\fragment.shd">
+      <Filter>shaders\waveParticles\particleBlending</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\particleBlending\vertex.shd">
+      <Filter>shaders\waveParticles\particleBlending</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\distributionTextureCleanup\fragment.shd">
+      <Filter>shaders\waveParticles\distributionTextureCleanup</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\distributionTextureCleanup\vertex.shd">
+      <Filter>shaders\waveParticles\distributionTextureCleanup</Filter>
     </None>
   </ItemGroup>
 </Project>

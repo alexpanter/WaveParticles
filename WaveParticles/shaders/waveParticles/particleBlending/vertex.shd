@@ -1,0 +1,30 @@
+//
+// Particle Blending
+//
+
+#version 330 core
+
+// (Position.x, Position.y, PropagationAngle, DispersionAngle)
+layout (location = 0) in vec4 paramVec1;
+
+// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
+layout (location = 1) in vec4 paramVec2;
+
+// (Radius, Amplitude, nBorderFrames)
+layout (location = 2) in vec4 paramVec3;
+
+// top-down orthographic projection matrix
+uniform mat4 projection;
+
+// output particle center to fragment processing (no interpolation!)
+flat out vec2 particleCenter;
+
+// interpolated position relative to particle center
+smooth out vec2 fragPos;
+
+void main()
+{
+	gl_Position = projection * vec4(paramVec1.xy, 0.0f, 1.0f);
+	particleCenter = paramVec1.xy;
+	fragPos = paramVec1.xy;
+}

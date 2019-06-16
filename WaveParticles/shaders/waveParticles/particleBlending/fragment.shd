@@ -1,0 +1,14 @@
+//
+// Particle Blending
+//
+
+#version 330 core
+
+// initially, just output a single height value.
+// When this works, horizontal deformation can be added as needed.
+out float height;
+
+void main()
+{
+
+}
