@@ -108,6 +108,22 @@ int main()
 	// TIMER
 	Utilities::MainTimer timer(30, 30);
 
+
+	// WAVE PARTICLE DISTRIBUTION TEXTURE
+
+	// define texture as resolution 512 x 512
+	const int WPD_TEXTURE_SIZE = 512;
+
+	GLuint wpdTexture;
+	glGenTextures(1, &wpdTexture);
+	glBindTexture(GL_TEXTURE_2D, wpdTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, WPD_TEXTURE_SIZE, WPD_TEXTURE_SIZE, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+
 	// WAVE PARTICLE DISTRIBUTION TEXTURE - CLEANUP
 	Shaders::ShaderWrapper wpdTextureCleanupShader(
 		"..|shaders|waveParticles|distributionTextureCleanup", Shaders::SHADER_TYPE_VF);
