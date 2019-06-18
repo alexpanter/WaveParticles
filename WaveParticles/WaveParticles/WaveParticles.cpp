@@ -18,6 +18,9 @@
 #include "TestTransformFeedback.h"
 #include "Particle.h"
 #include "RandomGenerator.h"
+#include "HeightMap.h"
+#include "TerrainMesh.h"
+#include "WaterMesh.h"
 
 using namespace Core;
 using namespace Utilities;
@@ -30,11 +33,17 @@ bool keyboard[1024];
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+	static bool wireframe = false;
 	if (action == GLFW_PRESS) {
 		switch (key)
 		{
 		case GLFW_KEY_ESCAPE:
 			win->CloseWindow();
+			break;
+		case GLFW_KEY_SPACE:
+			if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			wireframe = !wireframe;
 			break;
 		default:
 			keyboard[key] = true;
@@ -94,22 +103,44 @@ int main()
 	win->SetTitle("Wave Particles");
 	win->SetWindowed(aspect);
 	win->SetKeyCallback(KeyCallback);
+	win->SetClearFlags(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	// OPENGL
 	OpenGL::PrintRendererInfo();
+	//OpenGL::ApplyOpenGLRenderingSettings();
 
 	// CAMERA
-	glm::vec3 camPos(0.0f, 0.0f, 10.0f);
-	glm::vec3 camFront(1.0f, 1.0f, 0.0f);
-	glm::vec3 camUp(0.0f, 0.0f, 1.0f);
+	glm::vec3 camPos(0.0f, 0.0f, 15.3325f);
+	glm::vec3 camFront(0.0f, 1.0f, -1.0f);
+	glm::vec3 camUp(0.0f, 1.0f, 1.0f);
 	cam = new Graphics::BasicRTSCamera(aspect.GetWidth(), aspect.GetHeight(),
 		camPos, camFront, camUp);
 
 	// TIMER
-	Utilities::MainTimer timer(30, 30);
+	Utilities::MainTimer timer(60, 30);
+	GLfloat lastTime = glfwGetTime();
+	GLfloat nowTime;
+	GLfloat deltaTime;
 
 
 	// WAVE PARTICLE DISTRIBUTION TEXTURE
+
+	// framebuffer target
+	GLuint wpdTextureFramebuffer;
+	glGenFramebuffers(1, &wpdTextureFramebuffer);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, wpdTextureFramebuffer);
+
+	// to complete the framebuffer, we need:
+	//   - at least one attachment (color, depth, or stencil)
+	//   - at least one color attachment
+	//   - all attachments should be complete, with reserved memory
+	//   - each buffer should have the same number of samples (for multi-sampling)
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
 
 	// define texture as resolution 512 x 512
 	const int WPD_TEXTURE_SIZE = 512;
@@ -120,8 +151,12 @@ int main()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, WPD_TEXTURE_SIZE, WPD_TEXTURE_SIZE, 0,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WPD_TEXTURE_SIZE, WPD_TEXTURE_SIZE, 0,
 		GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
 
 
 	// WAVE PARTICLE DISTRIBUTION TEXTURE - CLEANUP
@@ -165,7 +200,6 @@ int main()
 
 
 
-
 	// DATA FOR TRANSFORM FEEDBACK
 
 	// visualizing shader
@@ -188,7 +222,7 @@ int main()
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	const int MAX_PARTICLES = 500000;
+	const int MAX_PARTICLES = 100000;
 	const int NUM_PARTICLES = 5;
 	PackedWaveParticle data[NUM_PARTICLES];
 	const GLsizeiptr numParticlesSize = NUM_PARTICLES * sizeof(PackedWaveParticle);
@@ -203,6 +237,7 @@ int main()
 		data[i].paramVec2 = glm::vec4(posX, posY, glfwGetTime(), 0.3f);
 		data[i].paramVec3 = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
 	}
+
 	
 	/* COMMENT BACK TO CREATE 5 STATICALLY POSITIONED PARTICLES
 	// PARTICLE 1
@@ -235,6 +270,7 @@ int main()
 	*/
 
 
+
 	glGenBuffers(2, tbo);
 	glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
 	glBufferData(GL_ARRAY_BUFFER, particleBufferSize, nullptr, GL_STATIC_DRAW);
@@ -265,6 +301,27 @@ int main()
 	GLuint timeElapsedTFShaderQueryObject;
 	glGenQueries(1, &timeElapsedTFShaderQueryObject);
 
+	glBindVertexArray(0);
+
+
+
+	// HEIGHT MAP FOR WATER SURFACE VISUALIZATION
+	Terrain::WaterMesh* waterSurfaceMesh = new Terrain::WaterMesh(16); // size is 128 x 128
+
+	Shaders::ShaderWrapper waterSurfaceMeshShader("..|shaders|waveParticles|waterSurface",
+		Shaders::SHADER_TYPE_VF);
+
+	waterSurfaceMeshShader.Activate();
+
+	cam->CalculateViewProjection();
+	glm::mat4 viewProjection(1.0f);
+	viewProjection *= *(cam->GetProjectionMatrix());
+	viewProjection *= *(cam->GetViewMatrix());
+	waterSurfaceMeshShader.SetUniform("viewProjection", &viewProjection);
+
+	waterSurfaceMeshShader.Deactivate();
+
+
 	// GAME LOOP
 	while (win->IsRunning())
 	{
@@ -273,20 +330,32 @@ int main()
 		bool camUpdate = false;
 		while (timer.ShouldUpdate())
 		{
+			nowTime = glfwGetTime();
+			deltaTime = nowTime - lastTime;
+			lastTime = nowTime;
 			win->PollEvents();
-			if (MoveCamera(timer.GetDeltaTime())) { camUpdate = true; }
+			if (MoveCamera(deltaTime)) { camUpdate = true; }
 		}
 
 		if (camUpdate) {
+			waterSurfaceMeshShader.Activate();
+
 			cam->CalculateViewProjection();
-			std::cout << "Move camera!" << std::endl;
+			viewProjection = glm::mat4(1.0f);
+			viewProjection *= *(cam->GetProjectionMatrix());
+			viewProjection *= *(cam->GetViewMatrix());
+			waterSurfaceMeshShader.SetUniform("viewProjection", &viewProjection);
+
+			waterSurfaceMeshShader.Deactivate();
 		}
 		
 		if (timer.ShouldRender()) {
 			win->ClearWindow();
 
 
+
 			// PERFORM TRANSFORM FEEDBACK
+			glBindVertexArray(vao);
 
 			imageTFShader.Activate();
 			imageTFShader.SetUniform("time", (GLfloat)glfwGetTime());
@@ -331,10 +400,11 @@ int main()
 			glFlush();
 			imageTFShader.Deactivate();
 
-			//std::cout << "primitives written: " << nParticlesAlive << std::endl;
+			glBindVertexArray(0);
 
 
-			
+
+			// RENDER WAVE PARTICLE DISTRIBUTION TEXTURE
 
 			// now particles can be rendered onto the 'wave particle distribution texture',
 			// which for each texel contains information about neighbouring particles
@@ -342,14 +412,13 @@ int main()
 			// OBS: Remember to set gl point size so that several fragments are
 			// generated for each particle!
 
-
-			// RENDER WAVE PARTICLE DISTRIBUTION TEXTURE
-
 			// first, the texture needs to be cleaned from previous operations
 
 
-
+			/*
 			// set attribute pointers
+			glBindVertexArray(wpdTextureVAO);
+
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
 
@@ -370,19 +439,22 @@ int main()
 
 			// Enable additive blending, such that fragments are not overwritten
 			// but blended (added) together
-
+			/*
 			GLboolean isBlendingEnabled;
 			glGetBooleanv(GL_BLEND, &isBlendingEnabled);
 
 			glEnable(GL_BLEND);
 			glBlendEquation(GL_FUNC_ADD);
 
-
+			glBindVertexArray(0);
+			*/
 
 
 
 
 			// RENDER TRANSFORM FEEDBACK RESULT
+			glBindVertexArray(vao);
+
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ARRAY_BUFFER, tbo[write]);
 
@@ -405,6 +477,15 @@ int main()
 			glDrawArrays(GL_POINTS, 0, nParticlesAlive);
 			visualizeShader.Deactivate();
 
+			glBindVertexArray(0);
+
+
+
+			// RENDER WATER SURFACE
+			waterSurfaceMeshShader.Activate();
+			waterSurfaceMesh->Render();
+			waterSurfaceMeshShader.Deactivate();
+
 			// DOUBLE_BUFFERING
 			win->SwapBuffers();
 
@@ -424,6 +505,7 @@ int main()
 	}
 
 	// cleanup
+	delete waterSurfaceMesh;
 	glDeleteQueries(1, &nParticlesAliveQueryObject);
 	glDeleteBuffers(2, tbo);
 	glDeleteVertexArrays(1, &vao);

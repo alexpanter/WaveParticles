@@ -175,6 +175,7 @@
     <ClInclude Include="ShaderWrapper.h" />
     <ClInclude Include="TerrainMesh.h" />
     <ClInclude Include="TestTransformFeedback.h" />
+    <ClInclude Include="WaterMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\image\fragment.shd" />
@@ -193,6 +194,8 @@
     <None Include="..\shaders\waveParticles\particleBlending\vertex.shd" />
     <None Include="..\shaders\waveParticles\particlePropagation\geometry.shd" />
     <None Include="..\shaders\waveParticles\particlePropagation\vertex.shd" />
+    <None Include="..\shaders\waveParticles\waterSurface\fragment.shd" />
+    <None Include="..\shaders\waveParticles\waterSurface\vertex.shd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
