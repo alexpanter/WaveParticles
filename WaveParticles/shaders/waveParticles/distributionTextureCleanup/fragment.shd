@@ -4,9 +4,9 @@
 
 #version 330 core
 
-out vec4 resetColor;
+out vec3 resetColor;
 
 void main()
 {
-	resetColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	resetColor = vec3(0.0f, 0.0f, 0.0f);
 }

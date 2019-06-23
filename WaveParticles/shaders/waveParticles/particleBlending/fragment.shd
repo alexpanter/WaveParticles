@@ -4,11 +4,18 @@
 
 #version 330 core
 
+flat in vec2 particleCenter;
+smooth in vec2 fragPos;
+
 // initially, just output a single height value.
 // When this works, horizontal deformation can be added as needed.
-out float height;
+out vec3 surfaceDeviation;
 
 void main()
 {
+	float x = 0;
+	float y = 0;
+	float z = 5.5;
 
+	surfaceDeviation = vec3(x, y, z);
 }

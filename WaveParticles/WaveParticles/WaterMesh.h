@@ -129,9 +129,11 @@ namespace Terrain
 				{
 					// grid point data (x, y, water height)
 					int index = row * _mapSize + col;
-					_vertices[index].GridPointData = glm::vec3(col, row, 0.0f);
+					_vertices[index].GridPointData =
+						glm::vec3((GLfloat)col, (GLfloat)row, 0.0f);
 				}
 			}
+			_vertices[0].GridPointData.z = 5.0f;
 
 			// triangulate
 			_triNormalgridSize = _mapSize - 1;
