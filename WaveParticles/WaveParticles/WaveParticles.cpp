@@ -31,6 +31,7 @@ Graphics::ApplicationWindow* win;
 Graphics::BasicRTSCamera* cam;
 bool keyboard[1024];
 GLint waterSurfacePolygonMode = GL_LINE;
+bool spawnNewParticle = false;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -45,6 +46,16 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			if(wireframe) waterSurfacePolygonMode = GL_LINE;
 			else waterSurfacePolygonMode = GL_FILL;
 			wireframe = !wireframe;
+			break;
+		case GLFW_KEY_P:
+			std::cout << "Camera position: " << glm::to_string(cam->GetPosition())
+				<< std::endl << "Camera view direction: " << glm::to_string(cam->GetViewDir())
+				<< std::endl << "Camera up: " << glm::to_string(cam->GetUp());
+		case GLFW_KEY_K:
+			spawnNewParticle = true;
+			break;
+		case GLFW_KEY_1:
+			PackedWaveParticle::TogglePropagate();
 			break;
 		default:
 			keyboard[key] = true;
@@ -111,9 +122,14 @@ int main()
 	//OpenGL::ApplyOpenGLRenderingSettings();
 
 	// CAMERA
-	glm::vec3 camPos(0.0f, 0.0f, 15.3325f);
-	glm::vec3 camFront(0.0f, 1.0f, -1.0f);
-	glm::vec3 camUp(0.0f, 1.0f, 1.0f);
+	//glm::vec3 camPos(0.0f, 0.0f, 15.3325f);
+	//glm::vec3 camFront(0.0f, 1.0f, -1.0f);
+	//glm::vec3 camUp(0.0f, 1.0f, 1.0f);
+
+	glm::vec3 camPos(6.238795f, -28.761112f, 71.082008f);
+	glm::vec3 camFront(0.353555f, 0.612372f, -0.707107f);
+	glm::vec3 camUp(0.353555f, 0.612372f, 0.707107f);
+	
 	cam = new Graphics::BasicRTSCamera(aspect.GetWidth(), aspect.GetHeight(),
 		camPos, camFront, camUp);
 
@@ -142,7 +158,7 @@ int main()
 	//   - each buffer should have the same number of samples (for multi-sampling)
 
 	// define texture as resolution N x N
-	const int WPD_TEXTURE_SIZE = 32;
+	const int WPD_TEXTURE_SIZE = 128;
 
 	GLuint wpdTexture;
 	glGenTextures(1, &wpdTexture);
@@ -150,8 +166,8 @@ int main()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WPD_TEXTURE_SIZE, WPD_TEXTURE_SIZE, 0,
-		GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, WPD_TEXTURE_SIZE, WPD_TEXTURE_SIZE, 0,
+		GL_RGB, GL_FLOAT, nullptr);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -245,9 +261,14 @@ int main()
 		GLfloat posX = Random::NextFloat(-1.0f, 1.0f);
 		GLfloat posY = Random::NextFloat(-1.0f, 1.0f);
 
+		// (Position.x, Position.y, PropagationAngle, DispersionAngle)
 		data[i].paramVec1 = glm::vec4(posX, posY, 0, glm::pi<GLfloat>() * 2.0f);
+
+		// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
 		data[i].paramVec2 = glm::vec4(posX, posY, glfwGetTime(), 0.3f * 0.5f);
-		data[i].paramVec3 = glm::vec4(0.025f, 0.1f, 0.0f, 0.0f);
+
+		// (Radius, Amplitude, nBorderFrames)
+		data[i].paramVec3 = glm::vec4(0.025f, 25.0f, 0.0f, 0.0f);
 	}
 
 	
@@ -371,6 +392,39 @@ int main()
 		if (timer.ShouldRender()) {
 			win->ClearWindow();
 
+			// CHECK WHETHER A NEW PARTICLE SHOULD BE SPAWNED
+			if (spawnNewParticle)
+			{
+				std::cout << "yes" << std::endl;
+				spawnNewParticle = false;
+				glBindVertexArray(vao);
+
+				PackedWaveParticle newParticle[1];
+				PackedWaveParticle::GenerateRandom(newParticle[0]);
+
+				// void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid * data);
+				//
+				// target : Specifies the target buffer object.The symbolic constant must be 
+				//          GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_PIXEL_PACK_BUFFER, or
+				//          GL_PIXEL_UNPACK_BUFFER.
+				// offset : Specifies the offset into the buffer object's data store where data
+				//          replacement will begin, measured in bytes.
+				// size : Specifies the size in bytes of the data store region being replaced.
+				// data : Specifies a pointer to the new data that will be copied into the data store.
+				glBindBuffer(GL_ARRAY_BUFFER, tbo[read]);
+				//std::cout << "particles alive: " << nParticlesAlive << std::endl;
+				//std::cout << "offset = " << nParticlesAlive * sizeof(PackedWaveParticle) << ", size = " << sizeof(PackedWaveParticle) << std::endl;
+				const GLintptr offset = nParticlesAlive * sizeof(PackedWaveParticle);
+				const GLsizeiptr size = sizeof(PackedWaveParticle);
+				glBufferSubData(GL_ARRAY_BUFFER, offset, size, (GLvoid*)newParticle);
+				glFlush();
+				glFinish();
+				nParticlesAlive++;
+
+				glBindVertexArray(0);
+			}
+
+
 
 
 			// PERFORM TRANSFORM FEEDBACK
@@ -470,8 +524,9 @@ int main()
 			glGetBooleanv(GL_BLEND, &isBlendingEnabled);
 
 			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);
 			glBlendEquation(GL_FUNC_ADD);
-
+			glEnable(GL_PROGRAM_POINT_SIZE);
 
 			// now particles can be rendered onto the 'wave particle distribution texture',
 			// which for each texel contains information about neighbouring particles
@@ -484,6 +539,7 @@ int main()
 			glBindVertexArray(0);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glDisable(GL_BLEND);
+			glDisable(GL_PROGRAM_POINT_SIZE);
 
 
 
@@ -491,7 +547,7 @@ int main()
 			// RENDER TRANSFORM FEEDBACK RESULT
 			glViewport(0, 0, aspect.GetWidth(), aspect.GetHeight());
 
-			///*
+			/*
 			glBindVertexArray(vao);
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -517,7 +573,7 @@ int main()
 			visualizeShader.Deactivate();
 
 			glBindVertexArray(0);
-			//*/
+			*/
 
 
 			// RENDER WATER SURFACE
@@ -555,5 +611,7 @@ int main()
 
 	delete cam;
 	delete win;
+	//std::cout << "pi: " << glm::pi<float>() << std::endl;
+	//system("pause");
 	return 0;
 }

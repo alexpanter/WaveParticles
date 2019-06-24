@@ -6,16 +6,24 @@
 
 flat in vec2 particleCenter;
 smooth in vec2 fragPos;
+in float amplitude;
+in float radius;
 
 // initially, just output a single height value.
 // When this works, horizontal deformation can be added as needed.
 out vec3 surfaceDeviation;
 
+// rectangle function
+
+
 void main()
 {
+	float dist = length(fragPos - particleCenter);
+
 	float x = 0;
 	float y = 0;
-	float z = 5.5;
+	float z = amplitude * (cos(3.14159 * dist / radius) + 1.0f);
+	//float z = amplitude;
 
 	surfaceDeviation = vec3(x, y, z);
 }
