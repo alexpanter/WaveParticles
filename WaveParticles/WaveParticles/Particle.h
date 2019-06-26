@@ -35,6 +35,7 @@ class PackedWaveParticle
 {
 private:
 	static bool propagate;
+	static bool createRemote;
 
 public:
 	// (Position.x, Position.y, PropagationAngle, DispersionAngle)
@@ -47,20 +48,30 @@ public:
 	glm::vec4 paramVec3;
 
 	static void TogglePropagate() { propagate = !propagate; }
+	static void ToggleCreateRemote() { createRemote = !createRemote; }
 
 	static void GenerateRandom(PackedWaveParticle& particle)
 	{
-		GLfloat posX = Random::NextFloat(-1.0f, 1.0f);
-		GLfloat posY = Random::NextFloat(-1.0f, 1.0f);
+		glm::vec2 pos;
+		if (PackedWaveParticle::createRemote) {
+			pos.x = Random::NextFloat(1.0f, 2.0f);
+			pos.y = Random::NextFloat(1.0f, 2.0f);
+		}
+		else {
+			pos.x = Random::NextFloat(-1.0f, 1.0f);
+			pos.y = Random::NextFloat(-1.0f, 1.0f);
+		}
+		
+		GLfloat propAngle = Random::NextFloat(0.0f, glm::two_pi<GLfloat>());
 
 		// (Position.x, Position.y, PropagationAngle, DispersionAngle)
-		particle.paramVec1 = glm::vec4(posX, posY, 0, (PackedWaveParticle::propagate) ? glm::pi<GLfloat>() * 2.0f : 0.0f);
+		particle.paramVec1 = glm::vec4(pos.x, pos.y, propAngle, (PackedWaveParticle::propagate) ? glm::pi<GLfloat>() * 2.0f : 0.0f);
 
 		// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
-		particle.paramVec2 = glm::vec4(posX, posY, glfwGetTime(), 0.3f * 0.5f);
+		particle.paramVec2 = glm::vec4(pos.x, pos.y, glfwGetTime(), 0.3f * 0.5f);
 
 		// (Radius, Amplitude, nBorderFrames)
-		particle.paramVec3 = glm::vec4(0.025f, 15.0f, 0.0f, 0.0f);
+		particle.paramVec3 = glm::vec4(0.025f, (PackedWaveParticle::propagate) ? 15.0f : 5.0f, 0.0f, 0.0f);
 	}
 
 	/*
@@ -80,3 +91,4 @@ public:
 };
 
 bool PackedWaveParticle::propagate = true;
+bool PackedWaveParticle::createRemote = false;

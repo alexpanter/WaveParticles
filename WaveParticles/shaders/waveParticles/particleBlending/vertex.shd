@@ -31,7 +31,7 @@ void main()
 	float x = paramVec1.x;
 	float y = paramVec1.y;
 	gl_Position = vec4(x, y, 0.0f, 1.0f);
-	gl_PointSize = 3.2f;
+	gl_PointSize = 3.5f;
 	particleCenter = paramVec1.xy;
 	fragPos = paramVec1.xy;
 	radius = paramVec3.x;

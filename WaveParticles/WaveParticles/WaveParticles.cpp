@@ -57,6 +57,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		case GLFW_KEY_1:
 			PackedWaveParticle::TogglePropagate();
 			break;
+		case GLFW_KEY_2:
+			PackedWaveParticle::ToggleCreateRemote();
+			break;
 		default:
 			keyboard[key] = true;
 		}
@@ -337,6 +340,13 @@ int main()
 	glBindVertexArray(0);
 
 
+	// total running time
+	GLint64 timeElapsedTotal = 0;
+	double timeElapsedTotalMilliseconds = 0;
+	GLuint timeElapsedTotalQueryObject;
+	glGenQueries(1, &timeElapsedTotalQueryObject);
+
+
 
 	// HEIGHT MAP FOR WATER SURFACE VISUALIZATION
 
@@ -424,7 +434,7 @@ int main()
 				glBindVertexArray(0);
 			}
 
-
+			glBeginQuery(GL_TIME_ELAPSED, timeElapsedTotalQueryObject);
 
 
 			// PERFORM TRANSFORM FEEDBACK
@@ -458,18 +468,18 @@ int main()
 			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, tbo[write]);
 
 			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, nParticlesAliveQueryObject);
-			glBeginQuery(GL_TIME_ELAPSED, timeElapsedTFShaderQueryObject);
+			//glBeginQuery(GL_TIME_ELAPSED, timeElapsedTFShaderQueryObject);
 			{
 				glBeginTransformFeedback(GL_POINTS);
 				glDrawArrays(GL_POINTS, 0, nParticlesAlive);
 				glEndTransformFeedback();
 			}
-			glEndQuery(GL_TIME_ELAPSED);
+			//glEndQuery(GL_TIME_ELAPSED);
 			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 
 			glGetQueryObjectuiv(nParticlesAliveQueryObject, GL_QUERY_RESULT, &nParticlesAlive);
-			glGetQueryObjecti64v(timeElapsedTFShaderQueryObject, GL_QUERY_RESULT,
-				&timeElapsedTFShader);
+			//glGetQueryObjecti64v(timeElapsedTFShaderQueryObject, GL_QUERY_RESULT,
+			//	&timeElapsedTFShader);
 
 			glDisable(GL_RASTERIZER_DISCARD);
 			glFlush();
@@ -585,6 +595,12 @@ int main()
 			waterSurfaceMesh->Render();
 			waterSurfaceMeshShader.Deactivate();
 
+
+			glEndQuery(GL_TIME_ELAPSED);
+			glGetQueryObjecti64v(timeElapsedTotalQueryObject, GL_QUERY_RESULT,
+				&timeElapsedTotal);
+
+
 			// DOUBLE_BUFFERING
 			win->SwapBuffers();
 
@@ -595,10 +611,11 @@ int main()
 		}
 
 		if (timer.ShouldReset()) {
-			timeElapsedMilliseconds = timeElapsedTFShader / 1000000.0;
+			//timeElapsedMilliseconds = timeElapsedTFShader / 1000000.0;
+			timeElapsedTotalMilliseconds = timeElapsedTotal / 1000000.0;
 			win->SetTitle(timer.GetTimeTitle() + " | particles alive: "
 				+ std::to_string(nParticlesAlive)
-				+ " | TF shader time (ms): " + std::to_string(timeElapsedMilliseconds));
+				+ " | Total shader time (ms): " + std::to_string(timeElapsedTotalMilliseconds));
 			std::cout << win->GetTitle() << std::endl;
 		}
 	}
@@ -612,6 +629,6 @@ int main()
 	delete cam;
 	delete win;
 	//std::cout << "pi: " << glm::pi<float>() << std::endl;
-	//system("pause");
+	system("pause");
 	return 0;
 }
