@@ -63,15 +63,17 @@ public:
 		}
 		
 		GLfloat propAngle = Random::NextFloat(0.0f, glm::two_pi<GLfloat>());
+		GLfloat amplitudeBias = Random::NextPositiveNegativeBias();
+		GLfloat amplitude = amplitudeBias * ((PackedWaveParticle::propagate) ? 15.0f : 5.0f);
 
 		// (Position.x, Position.y, PropagationAngle, DispersionAngle)
 		particle.paramVec1 = glm::vec4(pos.x, pos.y, propAngle, (PackedWaveParticle::propagate) ? glm::pi<GLfloat>() * 2.0f : 0.0f);
 
 		// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
-		particle.paramVec2 = glm::vec4(pos.x, pos.y, glfwGetTime(), 0.3f * 0.5f);
+		particle.paramVec2 = glm::vec4(pos.x, pos.y, glfwGetTime(), 0.20f * amplitudeBias);
 
 		// (Radius, Amplitude, nBorderFrames)
-		particle.paramVec3 = glm::vec4(0.025f, (PackedWaveParticle::propagate) ? 15.0f : 5.0f, 0.0f, 0.0f);
+		particle.paramVec3 = glm::vec4(0.025f, amplitude, 0.0f, 0.0f);
 	}
 
 	/*

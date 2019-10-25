@@ -60,12 +60,21 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		case GLFW_KEY_2:
 			PackedWaveParticle::ToggleCreateRemote();
 			break;
+
 		default:
 			keyboard[key] = true;
 		}
 	}
+
 	else if (action == GLFW_RELEASE) {
-		keyboard[key] = false;
+		switch (key)
+		{
+		case GLFW_KEY_K:
+			spawnNewParticle = false;
+
+		default:
+			keyboard[key] = false;
+		}
 	}
 }
 
@@ -253,7 +262,7 @@ int main()
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	const int MAX_PARTICLES = 100000;
+	const int MAX_PARTICLES = 200000;
 	const int NUM_PARTICLES = 1;
 	PackedWaveParticle data[NUM_PARTICLES];
 	const GLsizeiptr numParticlesSize = NUM_PARTICLES * sizeof(PackedWaveParticle);
@@ -405,8 +414,7 @@ int main()
 			// CHECK WHETHER A NEW PARTICLE SHOULD BE SPAWNED
 			if (spawnNewParticle)
 			{
-				std::cout << "yes" << std::endl;
-				spawnNewParticle = false;
+				//std::cout << "yes" << std::endl;
 				glBindVertexArray(vao);
 
 				PackedWaveParticle newParticle[1];

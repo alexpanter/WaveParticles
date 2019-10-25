@@ -65,7 +65,7 @@ void main()
 
 	// should this particle delete, will be true if the amplitude changes sign,
 	// or if the amplitude falls below a certain threshold < 0.001f
-	if(outParamVec3.y * sign(paramVec2.w) < 0 || outParamVec3.y < 0.01f) action.x = 1;
+	if(outParamVec3.y * sign(paramVec2.w) < 0 || abs(outParamVec3.y) < 0.01f) action.x = 1;
 
 	// should this particle subdivide
 	float d_t = paramVec1.w * velocity * timeSinceOrigin;
