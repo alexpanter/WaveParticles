@@ -49,7 +49,7 @@ void main()
 
 		outParamVec2.xy = vec2(sign(outParamVec1.x), outParamVec1.y); // origin <- position
 		outParamVec2.z = time; // time at origin <- now time
-	} 
+	}
 	if(abs(outParamVec1.y) > 1.0f) {
 		float normal = asin(-sign(outParamVec1.y));
 		float angle = paramVec1.z + acos(-1.0f);
@@ -65,9 +65,11 @@ void main()
 
 	// should this particle delete, will be true if the amplitude changes sign,
 	// or if the amplitude falls below a certain threshold < 0.001f
-	if(outParamVec3.y * sign(paramVec2.w) < 0 || abs(outParamVec3.y) < 0.01f) action.x = 1;
+	//if(outParamVec3.y * sign(paramVec2.w) < 0 || abs(outParamVec3.y) < 0.01f) action.x = 1;
+	action.x = int(outParamVec3.y * sign(paramVec2.w) < 0 || abs(outParamVec3.y) < 0.01f);
 
 	// should this particle subdivide
 	float d_t = paramVec1.w * velocity * timeSinceOrigin;
-	if(d_t > paramVec3.x * 0.5f) action.y = 1;
+	//if(d_t > paramVec3.x * 0.5f) action.y = 1;
+	action.y = int(d_t > paramVec3.x * 0.5f);
 }

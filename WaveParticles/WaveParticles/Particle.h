@@ -43,7 +43,7 @@ public:
 
 	// (Origin.x, Origin.y, TimeAtOrigin, Velocity / AmplitudeSign)
 	glm::vec4 paramVec2;
-	  
+
 	// (Radius, Amplitude, nBorderFrames)
 	glm::vec4 paramVec3;
 
@@ -61,7 +61,7 @@ public:
 			pos.x = Random::NextFloat(-1.0f, 1.0f);
 			pos.y = Random::NextFloat(-1.0f, 1.0f);
 		}
-		
+
 		GLfloat propAngle = Random::NextFloat(0.0f, glm::two_pi<GLfloat>());
 		GLfloat amplitudeBias = Random::NextPositiveNegativeBias();
 		GLfloat amplitude = amplitudeBias * ((PackedWaveParticle::propagate) ? 15.0f : 5.0f);
