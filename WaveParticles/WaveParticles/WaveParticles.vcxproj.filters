@@ -37,11 +37,29 @@
     <Filter Include="shaders\waveParticles">
       <UniqueIdentifier>{dc13273a-3166-44cf-b6c6-d68211e1cd11}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shaders\waveParticles\finalRenderer">
-      <UniqueIdentifier>{90d3181e-af1e-4828-912a-b7e4d60f5e73}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shaders\waveParticles\particlePropagation">
       <UniqueIdentifier>{9ee3d603-b65f-4876-b97d-b384ae23c9d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\waveParticles\particleBlending">
+      <UniqueIdentifier>{8bed190e-bdd3-4c88-a6de-0e06843617be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\waveParticles\distributionTextureCleanup">
+      <UniqueIdentifier>{1f1e6529-1bba-436a-aee9-9d9b7194184e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Terrain">
+      <UniqueIdentifier>{3d69da44-da6b-4b53-b71a-1caad9238163}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utilities">
+      <UniqueIdentifier>{ebe30e55-8fa5-40c5-a681-ea243cd0e739}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\waveParticles\waterSurface">
+      <UniqueIdentifier>{813a7ecf-656e-4530-8ef7-b9bb3461a8c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{fba55590-4617-4483-85e7-1781cf872564}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{7ebdf172-2638-4e7f-9620-ba17210b7b81}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -56,16 +74,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ApplicationWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AspectRatio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainTimer.h">
@@ -77,29 +86,41 @@
     <ClInclude Include="FileIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TestTransformFeedback.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeightMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RandomGenerator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainMesh.h">
+      <Filter>Header Files\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMap.h">
+      <Filter>Header Files\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterMesh.h">
+      <Filter>Header Files\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderLoader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderType.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderWrapper.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AspectRatio.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplicationWindow.h">
+      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -133,17 +154,29 @@
     <None Include="..\shaders\movePoint\vertex.shd">
       <Filter>shaders\movePoint</Filter>
     </None>
-    <None Include="..\shaders\waveParticles\finalRenderer\fragment.shd">
-      <Filter>shaders\waveParticles\finalRenderer</Filter>
-    </None>
-    <None Include="..\shaders\waveParticles\finalRenderer\vertex.shd">
-      <Filter>shaders\waveParticles\finalRenderer</Filter>
-    </None>
     <None Include="..\shaders\waveParticles\particlePropagation\geometry.shd">
       <Filter>shaders\waveParticles\particlePropagation</Filter>
     </None>
     <None Include="..\shaders\waveParticles\particlePropagation\vertex.shd">
       <Filter>shaders\waveParticles\particlePropagation</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\particleBlending\fragment.shd">
+      <Filter>shaders\waveParticles\particleBlending</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\particleBlending\vertex.shd">
+      <Filter>shaders\waveParticles\particleBlending</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\distributionTextureCleanup\fragment.shd">
+      <Filter>shaders\waveParticles\distributionTextureCleanup</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\distributionTextureCleanup\vertex.shd">
+      <Filter>shaders\waveParticles\distributionTextureCleanup</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\waterSurface\fragment.shd">
+      <Filter>shaders\waveParticles\waterSurface</Filter>
+    </None>
+    <None Include="..\shaders\waveParticles\waterSurface\vertex.shd">
+      <Filter>shaders\waveParticles\waterSurface</Filter>
     </None>
   </ItemGroup>
 </Project>

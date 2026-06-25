@@ -1,0 +1,18 @@
+//
+// Water Surface
+//
+
+#version 330 core
+
+layout (location = 0) in vec3 vertexPosition;
+
+uniform mat4 viewProjection;
+uniform sampler2D wpdTexture;
+uniform float mapSize;
+
+void main()
+{
+	vec2 xy = 1.0f / mapSize * vertexPosition.xy;
+	vec3 deviation = texture(wpdTexture, xy).xyz;
+	gl_Position = viewProjection * vec4(vertexPosition + deviation, 1.0f);
+}

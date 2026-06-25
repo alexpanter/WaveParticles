@@ -130,7 +130,7 @@ namespace Graphics
 
 			// enable scissors test, so that rendering calls will only affect
 			// the active viewport
-			glEnable(GL_SCISSOR_TEST);
+			//glEnable(GL_SCISSOR_TEST);
 		}
 
 		void SetWindowed(AspectRatio aspect)

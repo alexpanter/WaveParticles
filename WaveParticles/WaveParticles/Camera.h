@@ -157,6 +157,11 @@ namespace Graphics
 			return _position;
 		}
 
+		glm::vec3 GetUp()
+		{
+			return _up;
+		}
+
 		const glm::vec3* GetPosition() const
 		{
 			return const_cast<glm::vec3*>(&_position);

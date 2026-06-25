@@ -81,6 +81,11 @@ namespace Utilities
 
 
 		// floating-point values
+		GLfloat NextPositiveNegativeBias() {
+			GLfloat val = RandomGenerator<GLfloat>::GetInstance().NextRandomValue(-1.0f, 1.0f);
+			return (val <= 0.0f) ? -1.0f : 1.0f;
+		}
+
 		GLfloat NextFloat(GLfloat min, GLfloat max) {
 			if (min > max) {
 				int tmp = min;
